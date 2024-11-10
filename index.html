@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceTranslate</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .app-title {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .listen-btn {
+            width: 120px;
+            height: 120px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .listen-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .status {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="app-title">VoiceTranslate</h1>
+        <button class="listen-btn" id="startButton">🎤</button>
+        <p class="status" id="statusText">Premi il pulsante per iniziare.</p>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const statusText = document.getElementById('statusText');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        let currentLang = 'it-IT'; // Lingua iniziale
+        let isListening = false;
+        let isPlayingAudio = false; // Gestisce la riproduzione audio
+        let lastTranslation = ""; // Memorizza l'ultima traduzione inviata
+
+        if (!SpeechRecognition) {
+            statusText.innerText = "Il riconoscimento vocale non è supportato nel tuo browser.";
+            console.error("SpeechRecognition non supportato.");
+            startButton.disabled = true;
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = currentLang;
+
+            // Avvia il ciclo continuo con il pulsante
+            startButton.addEventListener('click', () => {
+                if (!isListening && !isPlayingAudio) {
+                    statusText.innerText = "In ascolto...";
+                    isListening = true;
+                    recognition.start();
+                }
+            });
+
+            recognition.onresult = (event) => {
+                if (isPlayingAudio) return; // Blocca il riconoscimento durante la riproduzione
+
+                const transcript = event.results[0][0].transcript.trim();
+                console.log("Trascrizione riconosciuta:", transcript);
+                statusText.innerText = `Hai detto: ${transcript}`;
+
+                // Ignora l'audio generato di recente
+                if (transcript === lastTranslation) {
+                    console.log("Ignorato: L'input è identico all'ultima traduzione.");
+                    return;
+                }
+
+                // Invia il testo e la lingua al backend per traduzione e audio
+                fetch('/process_audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: transcript, lang: currentLang.startsWith('it') ? 'it' : 'en' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.audio) {
+                        console.log("Risposta dal backend:", data);
+                        statusText.innerText = `Traduzione: ${data.text}`;
+                        lastTranslation = data.text; // Aggiorna l'ultima traduzione
+
+                        // Riproduzione audio
+                        const audio = new Audio("data:audio/mp3;base64," + data.audio);
+
+                        audio.onplay = () => {
+                            console.log("Riproduzione audio iniziata, il riconoscimento vocale è sospeso.");
+                            recognition.abort(); // Interrompi il riconoscimento durante la riproduzione
+                            isListening = false;
+                        };
+
+                        audio.onended = () => {
+                            console.log("Riproduzione audio terminata, il riconoscimento vocale riprende.");
+                            isPlayingAudio = false; // Sblocca il ciclo
+                            currentLang = currentLang === 'it-IT' ? 'en-US' : 'it-IT'; // Alterna lingua
+                            recognition.lang = currentLang;
+
+                            // Riprendi l'ascolto solo dopo che l'audio è terminato
+                            recognition.start();
+                            isListening = true;
+                        };
+
+                        isPlayingAudio = true; // Blocca il ciclo finché l'audio non finisce
+                        audio.play();
+                    } else {
+                        statusText.innerText = "Errore: traduzione non disponibile.";
+                        console.error("Errore nella risposta:", data.error);
+                    }
+                })
+                .catch(error => {
+                    statusText.innerText = "Errore nella richiesta.";
+                    console.error("Errore durante la fetch:", error);
+                });
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Errore nel riconoscimento vocale:", event.error);
+                if (event.error === "no-speech") {
+                    statusText.innerText = "Nessun audio rilevato. Riprovare.";
+                } else {
+                    statusText.innerText = `Errore: ${event.error}`;
+                }
+                isListening = false;
+            };
+
+            recognition.onend = () => {
+                if (isListening && !isPlayingAudio) recognition.start(); // Riavvia solo se non c'è audio in riproduzione
+            };
+        }
+    </script>
+</body>
+</html>
