@@ -1,0 +1,1 @@
+{"name":"starspeak-whistle","private":true,"version":"2.1.0","scripts":{"build":"node build.cjs","test":"node --test tests/audio.test.cjs"}}

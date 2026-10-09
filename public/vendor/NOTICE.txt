@@ -1,0 +1,18 @@
+StarSpeak uses the Needle WebAssembly runtime by Cactus Compute.
+The original runtime is licensed under Apache License 2.0 (LICENSE-Needle.txt).
+
+Unmodified generated files: needle.js, needle.wasm.
+Source: https://huggingface.co/Cactus-Compute/needle3
+Pinned revision: f84005f8992caf37f17b0d64a4b5b31a84ce0d2a
+Upstream project: https://github.com/cactus-compute/needle
+
+Speech weights are fetched separately from Cactus-Compute/whistle,
+revision b358ddadd89b7a713b5aa131f23032d3cca1b251.
+Audio is processed locally. This app has no server-side transcription route.
+
+WebRTC VAD is provided by libfvad, compiled to WebAssembly in
+@ozymandiasthegreat/vad version 2.0.7. License: BSD-3-Clause.
+See LICENSE-WebRTC.txt, AUTHORS-WebRTC.txt and PATENTS-WebRTC.txt.
+Source: https://github.com/OzymandiasTheGreat/libfvad-wasm
+Original library: https://github.com/dpirch/libfvad
+SHA-256 (libfvad.wasm): 3fadafc9c5c1c3117d0178ae631484c6dabc72e0f8742b95c370cd39f46cf171

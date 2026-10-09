@@ -1,0 +1,14 @@
+.venv/
+.vercel/
+__pycache__/
+*.pyc
+node_modules/
+public/vendor/needle.js
+public/vendor/needle.wasm
+public/vendor/libfvad.wasm
+.vad-download/
+tests/*.mp3
+tests/*.f32
+tests/*.cact
+*-access.json
+*-http.json

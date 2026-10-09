@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101d35">
+  <title>StarSpeak · Traduttore vocale</title>
+  <link rel="stylesheet" href="/styles.css?v=2.1">
+  <script defer src="/audio.js?v=2.1"></script>
+  <script defer src="/speech-detector.js?v=2.1"></script>
+  <script defer src="/app.js?v=2.1"></script>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">Star<span>Speak</span><span class="version">2.1</span></div>
+      <p class="tag">Una conversazione, due lingue.</p>
+    </header>
+    <section class="card" aria-label="Traduttore vocale">
+      <div class="direction">
+        <span id="from">Italiano</span>
+        <button id="swap" class="swap" type="button" aria-label="Cambia direzione">⇄</button>
+        <span id="to">English</span>
+      </div>
+      <p id="turn" class="turn">Tocca il microfono per iniziare</p>
+      <button id="mic" class="mic" type="button" aria-label="Avvia conversazione">
+        <svg id="mic-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="12" y="3" width="8" height="17" rx="4" stroke="currentColor" stroke-width="2.5"/><path d="M7 15v2a9 9 0 0 0 18 0v-2M16 26v4m-5 0h10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span id="stop-icon" hidden aria-hidden="true"></span>
+      </button>
+      <div class="meter" aria-hidden="true"><span id="level"></span></div>
+      <p id="status" class="status" role="status" aria-live="polite">Parla, poi fai una pausa: StarSpeak traduce e legge la frase.</p>
+      <button id="finish" class="secondary finish" type="button" disabled>Ho finito di parlare</button>
+      <div class="options">
+        <label><input id="auto-voice" type="checkbox" checked> Leggi la traduzione</label>
+        <label><input id="alternate" type="checkbox" checked> Alterna italiano e inglese</label>
+      </div>
+      <div class="line"></div>
+      <label class="label" for="heard">Hai detto <span id="heard-language">· Italiano</span></label>
+      <textarea id="heard" class="bubble source" rows="3" maxlength="1200" placeholder="La frase comparirà qui. Puoi anche scriverla o correggerla."></textarea>
+      <button id="translate" class="secondary" type="button" disabled>Traduci questa frase</button>
+      <div class="result-heading"><span class="label">Traduzione <span id="result-language"></span></span></div>
+      <p id="translated" class="bubble translation" lang="en" aria-live="polite">—</p>
+      <button id="replay" class="replay" type="button" disabled>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ascolta traduzione
+      </button>
+      <button id="resume" class="secondary resume" type="button" hidden>Continua ad ascoltare</button>
+      <p id="error" class="error" role="alert" hidden></p>
+    </section>
+    <p class="note">Il microfono si mette in pausa durante traduzione e voce.<br>Il riconoscimento con Whistle avviene sul dispositivo. Per tradurre e leggere la frase serve Internet: viene inviato il testo a Google (o MyMemory per la traduzione), non la registrazione.</p>
+  </main>
+</body>
+</html>
